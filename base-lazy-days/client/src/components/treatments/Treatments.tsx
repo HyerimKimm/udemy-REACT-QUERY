@@ -1,6 +1,6 @@
 import { Box, Heading, HStack } from "@chakra-ui/react";
 
-import { useTreatments } from "./hooks/useTreatments";
+import { useTreatments } from "@/components/treatments/hooks/useTreatments";
 import { Treatment } from "./Treatment";
 
 export function Treatments() {
