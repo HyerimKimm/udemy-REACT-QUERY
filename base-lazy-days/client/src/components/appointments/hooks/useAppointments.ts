@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { AppointmentDateMap } from "../types";
 import { getAvailableAppointments } from "../utils";
@@ -9,6 +9,12 @@ import { getMonthYearDetails, getNewMonthYear } from "./monthYear";
 import { useLoginData } from "@/auth/AuthContext";
 import { axiosInstance } from "@/axiosInstance";
 import { queryKeys } from "@/react-query/constants";
+
+// for useQuery and prefetchQuery
+const commonOptions = {
+  staleTime: 0,
+  gcTime: 1000 * 60 * 5, //5 minutes
+};
 
 // for useQuery call
 async function getAppointments(
@@ -49,6 +55,9 @@ export function useAppointments() {
     ],
     queryFn: () => getAppointments(monthYear.year, monthYear.month),
     select: (data) => selectFn(data, showAll),
+    refetchOnWindowFocus: true,
+    refetchInterval: 1000 * 60, //every second; not recommended for production
+    ...commonOptions,
   });
 
   useEffect(() => {
@@ -60,6 +69,7 @@ export function useAppointments() {
         { year: nextMonthYear.year, month: nextMonthYear.month },
       ],
       queryFn: () => getAppointments(nextMonthYear.year, nextMonthYear.month),
+      ...commonOptions,
     });
   }, [queryClient, monthYear]);
 
