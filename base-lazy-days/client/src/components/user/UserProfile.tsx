@@ -8,11 +8,14 @@ import {
   Input,
   Stack,
 } from "@chakra-ui/react";
+import { useMutationState } from "@tanstack/react-query";
 import { Field, Form, Formik } from "formik";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { usePatchUser } from "./hooks/usePatchUser";
+import { User } from "@shared/types";
+
+import { MUTATION_KEY, usePatchUser } from "./hooks/usePatchUser";
 import { useUser } from "./hooks/useUser";
 import { UserAppointments } from "./UserAppointments";
 
@@ -32,6 +35,18 @@ export function UserProfile() {
     }
   }, [userId, navigate]);
 
+  const pendingData = useMutationState({
+    filters: { mutationKey: [MUTATION_KEY], status: "pending" },
+    select: (mutation) => {
+      console.log(mutation.state.variables);
+      return mutation.state.variables as User;
+    },
+  });
+
+  //take the first item in the pendingData array
+  // we know there will be only one mutation that matches the filter
+  const pendingUser = pendingData ? pendingData[0] : null;
+
   const formElements = ["name", "address", "phone"];
   interface FormValues {
     name: string;
@@ -44,7 +59,9 @@ export function UserProfile() {
       <Stack spacing={8} mx="auto" w="xl" py={12} px={6}>
         <UserAppointments />
         <Stack textAlign="center">
-          <Heading>Information for {user?.name}</Heading>
+          <Heading>
+            Information for {pendingUser ? pendingUser.name : user?.name}
+          </Heading>
         </Stack>
         <Box rounded="lg" bg="white" boxShadow="lg" p={8}>
           <Formik
